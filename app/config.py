@@ -1,0 +1,5 @@
+import os
+
+JWT_ALGORITHM = "HS256"
+JWT_EXP_DAYS = 7
+JWT_SECRET = os.getenv("JWT_SECRET")
