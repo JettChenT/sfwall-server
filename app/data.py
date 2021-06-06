@@ -34,3 +34,10 @@ class DB:
         if phash == sha256(pw.encode()).hexdigest():
             return True, "Success!"
         return False, "Password is incorrect!"
+
+    def validate(self,data):
+        username = data["username"]
+        k = self.users.find_one({'_id': username})
+        if k is None:
+            return False, "No user identification data in jwt!"
+        return True, "authorized!"

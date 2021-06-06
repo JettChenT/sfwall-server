@@ -2,12 +2,14 @@ from fastapi import FastAPI, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 import jwt
+from unsplash import Unsplash
 from data import DB
 from datetime import datetime, timedelta
 from config import *
 
 app = FastAPI()
 db = DB()
+unsplash = Unsplash()
 
 
 class RegisterINP(BaseModel):
@@ -15,13 +17,16 @@ class RegisterINP(BaseModel):
     email: str
     password: str
 
+
 @app.get("/")
 async def home():
-    return {"msg":"Welcome!"}
+    return {"msg": "Welcome!"}
+
 
 @app.get("/ping")
 async def pong():
-    return {"ping":"pong"}
+    return {"ping": "pong"}
+
 
 @app.post("/register", status_code=status.HTTP_201_CREATED)
 async def reg(inp: RegisterINP, response: Response):
@@ -43,3 +48,17 @@ async def login(username, password, response: Response):
     }
     encoded_jwt = jwt.encode(payload, JWT_SECRET)
     return {"jwt": encoded_jwt}
+
+
+@app.get("/random", status_code=status.HTTP_200_OK)
+async def random_img(token, response: Response):
+    try:
+        decoded_jwt = jwt.decode(token, JWT_SECRET, JWT_ALGORITHM)
+        res, msg = db.validate(decoded_jwt)
+        if not res:
+            raise Exception("No user data in jwt!")
+        img_id = unsplash.get_random_img()
+        return {"img_id": img_id}
+    except Exception as e:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"msg": str(e)}
