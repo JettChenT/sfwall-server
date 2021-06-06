@@ -1,0 +1,10 @@
+services:
+  backend:
+    build: ./
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      - DB_PASSWORD
+      - DB_URL
+      - JWT_SECRET
