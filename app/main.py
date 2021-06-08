@@ -50,13 +50,12 @@ async def login(username, password, response: Response):
 
 @app.get("/random", status_code=status.HTTP_200_OK)
 async def random_img(token, response: Response):
-    unsplash = Unsplash()
     try:
         decoded_jwt = jwt.decode(token, JWT_SECRET, JWT_ALGORITHM)
         res, msg = db.validate(decoded_jwt)
         if not res:
             raise Exception("No user data in jwt!")
-        img_id = unsplash.get_random_img()
+        img_id = Unsplash().get_random_img()
         return {"img_id": img_id}
     except Exception as e:
         response.status_code = status.HTTP_401_UNAUTHORIZED
