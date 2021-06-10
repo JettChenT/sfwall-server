@@ -9,6 +9,7 @@ from config import *
 
 app = FastAPI()
 db = DB()
+unsplash = Unsplash()
 
 class RegisterINP(BaseModel):
     username: str
