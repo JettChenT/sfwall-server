@@ -1,7 +1,7 @@
 import pandas as pd
 import glob
 from tqdm import tqdm
-
+from pathlib import Path
 
 class Unsplash:
     def __init__(self):
