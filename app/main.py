@@ -50,7 +50,6 @@ async def login(username, password, response: Response):
 
 @app.get("/random", status_code=status.HTTP_200_OK)
 async def random_img(token, response: Response):
-    unsplash = Unsplash()
     try:
         decoded_jwt = jwt.decode(token, JWT_SECRET, JWT_ALGORITHM)
         res, msg = db.validate(decoded_jwt)
