@@ -2,7 +2,7 @@ from fastapi import FastAPI, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 import jwt
-from unsplash import Unsplash
+from unsplash import Unsplash,make_unsplash
 from data import DB
 from datetime import datetime, timedelta
 from config import *
@@ -55,7 +55,7 @@ async def random_img(token, response: Response):
         res, msg = db.validate(decoded_jwt)
         if not res:
             raise Exception("No user data in jwt!")
-        img_id = Unsplash().get_random_img()
+        img_id = make_unsplash().get_random_img()
         return {"img_id": img_id}
     except Exception as e:
         response.status_code = status.HTTP_401_UNAUTHORIZED

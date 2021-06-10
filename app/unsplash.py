@@ -1,16 +1,30 @@
 import pandas as pd
 import glob
 from tqdm import tqdm
+import pickle
 from pathlib import Path
+import timeit
+
+def make_unsplash(new=False):
+    pth = Path("./data/unsplash.pickle")
+    if Path.exists(pth) and not new:
+        fin = open(pth,'rb')
+        unsp = pickle.load(fin)
+        return unsp
+    unsp = Unsplash()
+    unsp.get_data()
+    pickle.dump(unsp, open(pth, 'wb'))
+    return unsp
 
 class Unsplash:
     def __init__(self):
-        path = './data/'
+        self.path = './data/'
         self.documents = ['photos', 'keywords', 'colors']
         self.datasets = {}
 
+    def get_data(self):
         for doc in tqdm(self.documents):
-            files = glob.glob(path + doc + ".tsv*")
+            files = glob.glob(self.path + doc + ".tsv*")
             subsets = []
             for filename in files:
                 df = pd.read_csv(filename, sep='\t', header=0)
