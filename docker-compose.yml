@@ -5,6 +5,26 @@ services:
     ports:
       - 80:80
     environment:
-      - DB_PASSWORD
-      - DB_URL
+      - MONGODB_PASSWORD
+      - MONGODB_URL
+      - JWT_ALGORITHM
+      - JWT_EXP_DAYS
       - JWT_SECRET
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_SERER
+      - POSTGRES_PORT
+      - POSTGRES_DB
+  db:
+    image: postgres:13
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/sfwdata/
+
+volumes:
+  postgres_data:

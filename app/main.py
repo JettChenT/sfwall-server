@@ -1,14 +1,19 @@
 from fastapi import FastAPI, Response, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 import jwt
-from unsplash import Unsplash,make_unsplash
-from data import DB
+from unsplash import make_unsplash
+from mongodb import MongoDB
 from datetime import datetime, timedelta
+import tasks
 from config import *
 
-app = FastAPI()
-db = DB()
+app = FastAPI(title="Scan for wallpapers API")
+db = MongoDB()
+
+
+# app.add_event_handler("startup", tasks.create_start_app_handler(app))
+# app.add_event_handler("shutdown", tasks.create_stop_app_handler(app))
+
 
 class RegisterINP(BaseModel):
     username: str
@@ -27,7 +32,7 @@ async def pong():
 
 
 @app.post("/register", status_code=status.HTTP_201_CREATED)
-async def reg(inp: RegisterINP, response: Response):
+def reg(inp: RegisterINP, response: Response):
     res, msg = db.register(inp.username, inp.password, inp.email)
     if not res:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -35,7 +40,7 @@ async def reg(inp: RegisterINP, response: Response):
 
 
 @app.get("/login", status_code=status.HTTP_200_OK)
-async def login(username, password, response: Response):
+def login(username, password, response: Response):
     res, msg = db.login(username, password)
     if not res:
         response.status_code = status.HTTP_400_BAD_REQUEST
@@ -49,7 +54,7 @@ async def login(username, password, response: Response):
 
 
 @app.get("/random", status_code=status.HTTP_200_OK)
-async def random_img(token, response: Response):
+def random_img(token, response: Response):
     try:
         decoded_jwt = jwt.decode(token, JWT_SECRET, JWT_ALGORITHM)
         res, msg = db.validate(decoded_jwt)
@@ -60,3 +65,25 @@ async def random_img(token, response: Response):
     except Exception as e:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"msg": str(e)}
+
+
+@app.get("/testdb", status_code=status.HTTP_200_OK)
+def testdb(response: Response):
+    try:
+        import postgres
+        res = postgres.main()
+        return {"msg":res}
+    except Exception as e:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {"error": str(e)}
+
+@app.get("/numrows",status_code=status.HTTP_200_OK)
+def numrow(db_name,response:Response):
+    try:
+        from postgres import PicDB
+        pd = PicDB()
+        ln = pd.get_len(db_name)
+        return {"len":ln}
+    except Exception as e:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {"error":str(e)}

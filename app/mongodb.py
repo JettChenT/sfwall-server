@@ -1,13 +1,14 @@
 import pymongo
 import os
 from hashlib import sha256
+from config import *
 
-class DB:
+class MongoDB:
     def __init__(self):
-        self.db_url = os.getenv("DB_URL")
-        self.db_pw = os.getenv("DB_PASSWORD")
-        print(self.db_url.format(pw=self.db_pw))
-        self.client = pymongo.MongoClient(self.db_url.format(pw=self.db_pw))
+        self.db_pw = MONGODB_PASSWORD
+        self.db_url = MONGODB_URL
+        print(self.db_url.format(pw=str(self.db_pw)))
+        self.client = pymongo.MongoClient(self.db_url.format(pw=str(self.db_pw)))
         self.db = self.client["test"]
         self.users = self.db["users"]
         self.preferences = self.db["pref"]
