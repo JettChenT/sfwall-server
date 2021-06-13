@@ -18,6 +18,7 @@ class PicDB:
         file1 = open("./data/create_tables.sql")
         query1 = text(file1.read())
         self.db.execute(query1)
+    def make_data(self):
         file = open("./data/load_data.sql")
         query = text(file.read())
         self.db.execute(query)
