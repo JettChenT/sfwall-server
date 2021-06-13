@@ -10,13 +10,18 @@ db = create_engine(DATABASE_URL)
 class PicDB:
     def __init__(self):
         self.db = create_engine(DATABASE_URL)
-        file = open("./data/create_tables.sql")
-        query = text(file.read())
-        self.db.execute(query)
     def get_len(self,table):
         res = self.db.execute(f"SELECT COUNT(*) FROM {table}")
         rw = res.fetchall()
         return rw[0][0]
+    def load_data(self):
+        file1 = open("./data/create_tables.sql")
+        query1 = text(file1.read())
+        self.db.execute(query1)
+        file = open("./data/load_data.sql")
+        query = text(file.read())
+        self.db.execute(query)
+
 
 
 def add_new_row(n):

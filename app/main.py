@@ -4,7 +4,6 @@ import jwt
 from unsplash import make_unsplash
 from mongodb import MongoDB
 from datetime import datetime, timedelta
-import tasks
 from config import *
 
 app = FastAPI(title="Scan for wallpapers API")
@@ -49,14 +48,14 @@ def login(username, password, response: Response):
         "username": username,
         "exp": datetime.utcnow() + timedelta(days=JWT_EXP_DAYS)
     }
-    encoded_jwt = jwt.encode(payload, JWT_SECRET)
+    encoded_jwt = jwt.encode(payload, str(JWT_SECRET))
     return {"jwt": encoded_jwt}
 
 
 @app.get("/random", status_code=status.HTTP_200_OK)
 def random_img(token, response: Response):
     try:
-        decoded_jwt = jwt.decode(token, JWT_SECRET, JWT_ALGORITHM)
+        decoded_jwt = jwt.decode(token, str(JWT_SECRET), JWT_ALGORITHM)
         res, msg = db.validate(decoded_jwt)
         if not res:
             raise Exception("No user data in jwt!")
@@ -72,18 +71,30 @@ def testdb(response: Response):
     try:
         import postgres
         res = postgres.main()
-        return {"msg":res}
+        return {"msg": res}
     except Exception as e:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {"error": str(e)}
+        return {"errorc": str(e)}
 
-@app.get("/numrows",status_code=status.HTTP_200_OK)
-def numrow(db_name,response:Response):
+
+@app.get("/numrows", status_code=status.HTTP_200_OK)
+def numrow(db_name, response: Response):
     try:
         from postgres import PicDB
         pd = PicDB()
         ln = pd.get_len(db_name)
-        return {"len":ln}
+        return {"len": ln}
+    except Exception as e:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {"error": str(e)}
+
+@app.get("/createdb",status_code=status.HTTP_200_OK)
+def createdb(response:Response):
+    try:
+        from postgres import PicDB
+        pd = PicDB()
+        pd.load_data()
+        return {"msg": "success"}
     except Exception as e:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"error":str(e)}
