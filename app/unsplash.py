@@ -34,3 +34,8 @@ class Unsplash:
     def get_random_img(self):
         samp_data = self.datasets["photos"].sample()
         return samp_data.iloc[0]["photo_id"]
+
+    def to_sql(self, engine):
+        for fn in self.documents:
+            self.datasets[fn].reset_index(drop=True,inplace=True)
+            self.datasets[fn].to_sql(f"unsplash_{fn}", con=engine, if_exists='append')
