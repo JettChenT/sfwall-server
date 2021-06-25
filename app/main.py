@@ -1,24 +1,18 @@
+import os
+from .models import *
+from .config import *
+from .mongodb import MongoDB
+from .postgres import PicDB
+
 from fastapi import FastAPI, Response, status
-from pydantic import BaseModel
 import jwt
-from unsplash import make_unsplash
-from mongodb import MongoDB
 from datetime import datetime, timedelta
-from config import *
+from mangum import Mangum
 
-app = FastAPI(title="Scan for wallpapers API")
+stage = os.environ.get('STAGE', None)
+openapi_prefix = f"/{stage}" if stage else "/"
+app = FastAPI(title="SFWALL API")
 db = MongoDB()
-
-
-# app.add_event_handler("startup", tasks.create_start_app_handler(app))
-# app.add_event_handler("shutdown", tasks.create_stop_app_handler(app))
-
-
-class RegisterINP(BaseModel):
-    username: str
-    email: str
-    password: str
-
 
 @app.get("/")
 async def home():
@@ -55,46 +49,28 @@ def login(username, password, response: Response):
 @app.get("/random", status_code=status.HTTP_200_OK)
 def random_img(token, response: Response):
     try:
-        decoded_jwt = jwt.decode(token, str(JWT_SECRET), JWT_ALGORITHM)
-        res, msg = db.validate(decoded_jwt)
+        res, msg = db.auth(token)
         if not res:
             raise Exception("No user data in jwt!")
-        img_id = make_unsplash().get_random_img()
+        pd = PicDB()
+        img_id = pd.get_random_img()
         return {"img_id": img_id}
     except Exception as e:
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"msg": str(e)}
-
-
-@app.get("/testdb", status_code=status.HTTP_200_OK)
-def testdb(response: Response):
-    try:
-        import postgres
-        res = postgres.main()
-        return {"msg": res}
-    except Exception as e:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {"errorc": str(e)}
-
-
-@app.get("/numrows", status_code=status.HTTP_200_OK)
-def numrow(db_name, response: Response):
-    try:
-        from postgres import PicDB
-        pd = PicDB()
-        ln = pd.get_len(db_name)
-        return {"len": ln}
-    except Exception as e:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"error": str(e)}
 
-@app.get("/createdb",status_code=status.HTTP_200_OK)
-def createdb(response:Response):
+@app.post("/rate", status_code=status.HTTP_200_OK)
+def rate(inp: RateINP, response:Response):
     try:
-        from postgres import PicDB
+        res, msg = db.auth(inp.jwt)
+        if not res:
+            raise Exception(msg)
         pd = PicDB()
-        pd.load_data()
-        return {"msg": "success"}
+        username = msg
+        pd.add_rating(username,inp.photo_id,inp.rating)
+        return {"msg":"Success!"}
     except Exception as e:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {"error":str(e)}
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"error": str(e)}
+
+handler = Mangum(app)

@@ -1,0 +1,11 @@
+{
+  "name": "sfwall-server",
+  "version": "1.0.0",
+  "dependencies": {
+    "serverless-python-requirements": "^5.1.1"
+  },
+  "devDependencies": {
+    "serverless-domain-manager": "^5.1.0",
+    "serverless-ignore": "^0.1.6"
+  }
+}

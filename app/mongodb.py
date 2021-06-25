@@ -1,7 +1,8 @@
 import pymongo
 import os
 from hashlib import sha256
-from config import *
+import jwt
+from .config import *
 
 class MongoDB:
     def __init__(self):
@@ -36,9 +37,14 @@ class MongoDB:
             return True, "Success!"
         return False, "Password is incorrect!"
 
+    def auth(self,jwt_token):
+        decoded_jwt = jwt.decode(jwt_token, str(JWT_SECRET), JWT_ALGORITHM)
+        res, username = self.validate(decoded_jwt)
+        return res,username
+
     def validate(self,data):
         username = data["username"]
         k = self.users.find_one({'_id': username})
         if k is None:
             return False, "No user identification data in jwt!"
-        return True, "authorized!"
+        return True, username

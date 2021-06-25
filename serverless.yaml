@@ -1,0 +1,49 @@
+# serverless.yml
+
+service: sfw-api
+
+package:
+  patterns:
+    - '!.idea/**'
+
+plugins:
+    - serverless-python-requirements
+    - serverless-domain-manager
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+  customDomain:
+    domainName: api.scan4wall.xyz
+    createRoute53Record: false
+
+
+
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage: dev
+  region: us-east-1
+
+functions:
+  app:
+    handler: app.main.handler
+    environment:
+      STAGE: ${self:provider.stage}
+      JWT_ALGORITHM: ${env:JWT_ALGORITHM}
+      JWT_EXP_DAYS: ${env:JWT_EXP_DAYS}
+      JWT_SECRET: ${env:JWT_SECRET}
+      LICENSE_KEY: ${env:LICENSE_KEY}
+      MONGODB_PASSWORD: ${env:MONGODB_PASSWORD}
+      MONGODB_URL: ${env:MONGODB_URL}
+      POSTGRES_DB: ${env:POSTGRES_DB}
+      POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+      POSTGRES_PORT: ${env:POSTGRES_PORT}
+      POSTGRES_SERVER: ${env:POSTGRES_SERVER}
+      POSTGRES_USER: ${env:POSTGRES_USER}
+      ROOT_PASSWORD: ${env:ROOT_PASSWORD}
+    events:
+      - http:
+          method: any
+          path: /{proxy+}

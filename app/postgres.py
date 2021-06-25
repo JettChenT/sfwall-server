@@ -1,62 +1,38 @@
 import time
-import random
 
-from sqlalchemy import create_engine
-from sqlalchemy.sql import text
-from config import *
+from .config import *
+from random import randint
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table, insert, MetaData
+from sqlalchemy.orm import declarative_base
 
-db = create_engine(DATABASE_URL)
+UPPER = 250
+Base = declarative_base()
+metadata = MetaData()
+
 
 class PicDB:
     def __init__(self):
         self.db = create_engine(DATABASE_URL)
-    def get_len(self,table):
+
+    def get_len(self, table):
         res = self.db.execute(f"SELECT COUNT(*) FROM {table}")
         rw = res.fetchall()
         return rw[0][0]
-    def load_data(self):
-        file1 = open("./data/create_tables.sql")
-        query1 = text(file1.read())
-        self.db.execute(query1)
-    def make_data(self):
-        file = open("./data/load_data.sql")
-        query = text(file.read())
-        self.db.execute(query)
 
+    def get_random_img(self):
+        res = self.db.execute(f"SELECT photo_id FROM testphotos WHERE index={randint(0, UPPER)};")
+        rw = res.fetchall()
+        return rw[0][0]
 
+    def get_categories(self, img_id):
+        res = self.db.execute(f"SELECT keyword FROM unsplash_keywords WHERE photo_id=\'{img_id}\';")
+        rw = res.fetchall()
+        return rw
 
-def add_new_row(n):
-    # Insert a new number into the 'numbers' table.
-    db.execute("INSERT INTO temp3 (number,timestamp) "
-        "VALUES ({0},{1})"
-            .format(str(n), str(int(round(time.time() * 1000))))
-    )
-
-
-def get_last_row():
-    # Retrieve the last number inserted inside the 'numbers'
-    query = "" + \
-            "SELECT number " + \
-            "FROM temp3 " + \
-            "WHERE timestamp >= (SELECT max(timestamp) FROM temp3)" + \
-            "LIMIT 1"
-
-    result_set = db.execute(query)
-    for (r) in result_set:
-        return r[0]
-
-def init_tmp_table():
-    sql_str = """
-    CREATE TABLE IF NOT EXISTS temp3(
-        number int,
-        timestamp varchar(14)
-    )
-    """
-    db.execute(sql_str)
-
-
-
-def main():
-    init_tmp_table()
-    add_new_row(random.randint(1, 100000))
-    return 'The last value insterted is: {}'.format(get_last_row())
+    def add_rating(self, userid, imageid, rating):
+        ratings_table = Table('user_ratings', metadata, autoload_with=self.db)
+        stmt = (
+            insert(ratings_table).
+                values(user_id=userid, photo_id=imageid, rating=rating)
+        )
+        self.db.execute(stmt)
