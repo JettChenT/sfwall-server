@@ -15,3 +15,4 @@ SQLAlchemy==1.4.19
 alembic
 psycopg2
 mangum==0.11.0
+fastapi-auth0==0.2.1

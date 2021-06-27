@@ -7,6 +7,5 @@ class RegisterINP(BaseModel):
     password: str
 
 class RateINP(BaseModel):
-    jwt:str
     rating:int
     photo_id:str
