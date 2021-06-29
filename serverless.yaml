@@ -43,6 +43,8 @@ functions:
       POSTGRES_SERVER: ${env:POSTGRES_SERVER}
       POSTGRES_USER: ${env:POSTGRES_USER}
       ROOT_PASSWORD: ${env:ROOT_PASSWORD}
+      AUTH0_API_AUDIENCE: ${env:AUTH0_API_AUDIENCE}
+      AUTH0_DOMAIN: ${env:AUTH0_DOMAIN}
     events:
       - http:
           method: any
