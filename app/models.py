@@ -7,5 +7,5 @@ class RegisterINP(BaseModel):
     password: str
 
 class RateINP(BaseModel):
-    rating:int
+    rating:float
     photo_id:str

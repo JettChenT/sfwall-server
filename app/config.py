@@ -16,6 +16,7 @@ POSTGRES_PORT = config("POSTGRES_PORT", cast=str, default="5432")
 POSTGRES_DB = config("POSTGRES_DB", cast=str)
 AUTH0_API_AUDIENCE = config("AUTH0_API_AUDIENCE",cast=str)
 AUTH0_DOMAIN = config("AUTH0_DOMAIN",cast=str)
+AI_API_KEY = config("AI_API_KEY",cast=str)
 DATABASE_URL = config(
     "DATABASE_URL",
     cast=str,

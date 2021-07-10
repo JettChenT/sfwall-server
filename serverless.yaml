@@ -45,6 +45,7 @@ functions:
       ROOT_PASSWORD: ${env:ROOT_PASSWORD}
       AUTH0_API_AUDIENCE: ${env:AUTH0_API_AUDIENCE}
       AUTH0_DOMAIN: ${env:AUTH0_DOMAIN}
+      AI_API_KEY: ${env:AI_API_KEY}
     events:
       - http:
           method: any
