@@ -38,3 +38,12 @@ def update():
     )
     r_data = r.json()
     return r_data, r.status_code
+
+def get_random_img(n):
+    r = requests.get(
+        "https://ai.scan4wall.xyz/random",{
+            "n":n
+        }
+    )
+    r_data = r.json()
+    return r_data, r.status_code
