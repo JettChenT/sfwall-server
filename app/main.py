@@ -56,6 +56,11 @@ def rate(inp: RateINP, user: Auth0User = Security(auth.get_user)):
     pd.add_rating(user.id, inp.photo_id, inp.rating)
     return {"msg": "Success!"}
 
+@app.get("/generatetoken", status_code=status.HTTP_200_OK, dependencies=[Depends(auth.implicit_scheme)])
+def gen_token(user: Auth0User = Security(auth.get_user)):
+    pd = PicDB()
+    access_token = pd.gen_access_token(user.id)
+    return {"access_token": access_token}
 
 @app.post("/update",status_code=status.HTTP_200_OK, dependencies=[Depends(auth.implicit_scheme)])
 def update_model(response:Response, user:Auth0User=Security(auth.get_user)):
@@ -72,9 +77,20 @@ def top(n:int, response:Response, user: Auth0User = Security(auth.get_user)):
 
 
 @app.get("/recommendation", status_code=status.HTTP_200_OK, dependencies=[Depends(auth.implicit_scheme)])
-def recommend(response: Response, user: Auth0User = Security(auth.get_user)):
+def recommend(response: Response, dtime:str='', user: Auth0User = Security(auth.get_user)):
     print(user)
-    resp, code = get_recommendation(user.id)
+    resp, code = get_recommendation(user.id,dtime=dtime)
+    response.status_code = code
+    return resp
+
+@app.get("/token-recommendation", status_code=status.HTTP_200_OK)
+def token_recommend(access_token,response: Response, dtime:str=''):
+    pd = PicDB()
+    user_id = pd.get_user_by_access_token(access_token)
+    if user_id is None:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {'msg': 'Invalid access token'}
+    resp, code = get_recommendation(user_id, dtime=dtime)
     response.status_code = code
     return resp
 

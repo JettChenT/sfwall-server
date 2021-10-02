@@ -1,8 +1,9 @@
 import time
 
 from .config import *
+from .password import generate
 from random import randint
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table, insert, MetaData
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table, insert, MetaData, select
 from sqlalchemy.orm import declarative_base
 
 UPPER = 24999
@@ -42,3 +43,28 @@ class PicDB:
                 values(user_id=userid, photo_id=imageid, rating=rating)
         )
         self.db.execute(stmt)
+    
+    def gen_access_token(self,user_id):
+        """Generate access token and store it in database"""
+        access_token = generate()
+        # Initiate table "tokens"
+        tokens_table = Table('tokens', metadata, autoload_with=self.db)
+        stmt = (
+            insert(tokens_table).
+                values(user_id=user_id, access_token=access_token)
+        )
+        self.db.execute(stmt)
+        return access_token
+    
+    def get_user_by_access_token(self,access_token):
+        """Get user_id by access token"""
+        tokens_table = Table('tokens', metadata, autoload_with=self.db)
+        stmt = (
+            select([tokens_table]).
+                where(tokens_table.c.access_token == access_token)
+        )
+        res = self.db.execute(stmt)
+        rw = res.fetchall()
+        if len(rw) == 0:
+            return None
+        return rw[0][0]

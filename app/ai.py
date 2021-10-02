@@ -11,10 +11,11 @@ def get_similar_images(img_id, n):
     r_data = r.json()
     return r_data, r.status_code
 
-def get_recommendation(user_id):
+def get_recommendation(user_id, dtime=''):
     r = requests.get(
         "https://ai.scan4wall.xyz/recommend", {
             "user_id":user_id,
+            "dtime":dtime,
             "access_token": AI_API_KEY
         }
     )

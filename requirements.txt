@@ -17,3 +17,4 @@ psycopg2
 mangum==0.11.0
 fastapi-auth0==0.2.1
 requests==2.25.1
+xkcdpass==1.19.2
